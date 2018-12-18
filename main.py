@@ -67,27 +67,36 @@ class Automatizator:
         self.things = []   # здесь и далее things - и файлы, и папки
         self.FILENAME = 0
         self.DIRPATH = 1
-        self.DIRNAME = 2
 
     # nesting_level отвечает за уровень вложенности (если 0 - не входит во вложенные каталоги,
     # если 1 - входит в подкаталоги, если -1 - входит во все подпапки)
     def find_things(self, nesting_level=-1):
-        things = []
+        things = set()
         level = nesting_level
-        for (dirpath, dirnames, names) in os.walk(self.get_path()):
+        for (dirpath, dirnames, filenames) in os.walk(self.get_path()):
             path = dirpath
             path = path.replace('\\', '/')
-            things.append((names, path))
+            for filename in filenames:
+                type = 'file'
+                things.add((filename, path, type))
+            for dirname in dirnames:
+                type = 'folder'
+                things.add((dirname, path + '/' + dirname, type))
             if level == 0:
                 break
             else:
                 level -= 1
-        for name, path in things:
-            if name:
-                thing = File(name[0], name[0].split('.')[-1], path)
+        things = list(things)
+        print(things)
+        for name, path, type in things:
+            if type == 'file':
+                thing = File(name, name.split('.')[-1], path)
+                self.things.append(thing)
             else:
-                thing = Folder(path)
-            self.things.append(thing)
+                cur_path = os.getcwd().replace('\\', '/') + '/' + self.path.split('/')[-1]
+                if cur_path != path:
+                    thing = Folder(path)
+                    self.things.append(thing)
 
     def get_path(self):
         return self.path
@@ -98,7 +107,7 @@ class Automatizator:
 
 if __name__ == '__main__':
     auto = Automatizator('D:/Python/Automatizator/test')
-    auto.find_things()
+    auto.find_things(nesting_level=2)
     for i in auto.get_things():
         print(i.get_name())
         print(i.get_path())
