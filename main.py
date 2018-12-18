@@ -1,12 +1,13 @@
 import os
 import ctypes
-
+import shutil
 
 class File:
     def __init__(self, name, type, path):
         self.name = name
         self.type = type
         self.path = path + '/' + name
+        self.hidden = False
 
     def change_name(self, new_name):
         self.name = new_name
@@ -18,10 +19,11 @@ class File:
 
     def hide(self):  # прячет файл
         ctypes.windll.kernel32.SetFileAttributesW(self.get_path(), 2)
+        self.hidden = True
 
     def unhide(self):  # открывает файл
         ctypes.windll.kernel32.SetFileAttributesW(self.get_path(), 128)
-        # отправить автоматизатору
+        self.hidden = False
 
     # "геттеры"
     def get_name(self):
@@ -41,14 +43,19 @@ class Folder:
     def __init__(self, path):
         self.path = path
         self.name = path.split('/')[-1]
+        self.hidden = False
 
     def change_name(self, new_name):
         self.name = new_name
         # отправить автоматизатору
 
-    def hide_file(self):  # прячет\показывает имя папки
-        self.name = '.' + self.name
-        # отправить автоматизатору
+    def hide(self):  # прячет файл
+        ctypes.windll.kernel32.SetFileAttributesW(self.get_path(), 2)
+        self.hidden = True
+
+    def unhide(self):  # открывает файл
+        ctypes.windll.kernel32.SetFileAttributesW(self.get_path(), 128)
+        self.hidden = False
 
     # "геттеры"
     def get_name(self):
@@ -87,7 +94,6 @@ class Automatizator:
             else:
                 level -= 1
         things = list(things)
-        print(things)
         for name, path, type in things:
             if type == 'file':
                 thing = File(name, name.split('.')[-1], path)
@@ -97,6 +103,22 @@ class Automatizator:
                 if cur_path != path:
                     thing = Folder(path)
                     self.things.append(thing)
+
+    def delete_certain_things(self, type='', name='', only_files=False):  # если only_files, то не будет трогать папки
+        for thing in self.things.copy():
+            thing_type = thing.__class__.__name__
+            if thing_type == 'Folder' and not only_files and name in thing.get_name():
+                shutil.rmtree(thing.get_path(), ignore_errors=True)
+                self.things.remove(thing)
+            elif thing_type == 'File' and name in thing.get_name() \
+                and thing.get_name().split('.')[-1] == type:
+                os.remove(thing.get_path())
+                self.things.remove(thing)
+
+                # ПРОВЕРИТЬ!!!
+
+
+
 
     def get_path(self):
         return self.path
