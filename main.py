@@ -1,13 +1,18 @@
 import os
-import ctypes
+import win32api, win32con
 import shutil
+import time
 
 class File:
     def __init__(self, name, type, path):
         self.name = name
         self.type = type
         self.path = path + '/' + name
-        self.hidden = False
+        self.hidden = win32api.GetFileAttributes(self.get_path())
+        if self.hidden == 128:
+            self.hidden = False
+        else:
+            self.hidden = True
 
     def change_name(self, new_name):
         self.name = new_name
@@ -18,11 +23,11 @@ class File:
         # отправить автоматизатору
 
     def hide(self):  # прячет файл
-        ctypes.windll.kernel32.SetFileAttributesW(self.get_path(), 2)
+        win32api.SetFileAttributes(self.get_path(), win32con.FILE_ATTRIBUTE_HIDDEN)
         self.hidden = True
 
     def unhide(self):  # открывает файл
-        ctypes.windll.kernel32.SetFileAttributesW(self.get_path(), 128)
+        win32api.SetFileAttributes(self.get_path(), win32con.FILE_ATTRIBUTE_NORMAL)
         self.hidden = False
 
     # "геттеры"
@@ -36,25 +41,29 @@ class File:
         return self.path
 
     def is_hidden(self):
-        pass
+        return self.hidden
 
 
 class Folder:
     def __init__(self, path):
         self.path = path
         self.name = path.split('/')[-1]
-        self.hidden = False
+        self.hidden = win32api.GetFileAttributes(self.get_path())
+        if self.hidden in [2, 18]:
+            self.hidden = True
+        else:
+            self.hidden = False
 
     def change_name(self, new_name):
         self.name = new_name
         # отправить автоматизатору
 
     def hide(self):  # прячет файл
-        ctypes.windll.kernel32.SetFileAttributesW(self.get_path(), 2)
+        win32api.SetFileAttributes(self.get_path(), win32con.FILE_ATTRIBUTE_HIDDEN)
         self.hidden = True
 
     def unhide(self):  # открывает файл
-        ctypes.windll.kernel32.SetFileAttributesW(self.get_path(), 128)
+        win32api.SetFileAttributes(self.get_path(), win32con.FILE_ATTRIBUTE_NORMAL)
         self.hidden = False
 
     # "геттеры"
@@ -65,7 +74,7 @@ class Folder:
         return self.path
 
     def is_hidden(self):
-        pass
+        return self.hidden
 
 
 class Automatizator:
@@ -74,6 +83,9 @@ class Automatizator:
         self.things = []   # здесь и далее things - и файлы, и папки
         self.FILENAME = 0
         self.DIRPATH = 1
+        self.rename_lambdas = {
+            'дата-время': lambda x: x + time.strftime(' [%Y-%m-%d %H-%M-%S]', time.gmtime())
+        }
 
     # nesting_level отвечает за уровень вложенности (если 0 - не входит во вложенные каталоги,
     # если 1 - входит в подкаталоги, если -1 - входит во все подпапки)
@@ -107,16 +119,60 @@ class Automatizator:
     def delete_certain_things(self, type='', name='', only_files=False):  # если only_files, то не будет трогать папки
         for thing in self.things.copy():
             thing_type = thing.__class__.__name__
-            print(thing_type)
             only_files1 = only_files
             if type:
                 only_files1 = True
             if thing_type == 'Folder' and not only_files1 and name in thing.get_name():
                 shutil.rmtree(thing.get_path(), ignore_errors=True)
                 self.things.remove(thing)
-            elif thing_type == 'File' and name in thing.get_name() and type in thing.get_type():
+            elif thing_type == 'File' and name in thing.get_name() and (not type or type == thing.get_type()):
                 os.remove(thing.get_path())
                 self.things.remove(thing)
+
+    def rename_certian_things(self, type='', name='', only_files=False, function=lambda x: x + '1'):
+        for thing in self.things.copy():
+            thing_type = thing.__class__.__name__
+            only_files1 = only_files
+            if type:
+                only_files1 = True
+            if thing_type == 'Folder' and not only_files1 and name in thing.get_name():
+                path = '/'.join(thing.get_path().split('/')[:-1])
+                old_name = thing.get_path().split('/')[-1]
+                new_name = function(old_name)
+                old_path = path + '/' + old_name
+                new_path = path + '/' + new_name
+                os.rename(old_path, new_path)
+            elif thing_type == 'File' and name in thing.get_name() and (not type or type == thing.get_type()):
+                path = '/'.join(thing.get_path().split('/')[:-1])
+                type = thing.get_type()
+                old_name = thing.get_path().split('/')[-1]
+                old_name = '.'.join(old_name.split('.')[:-1])
+                new_name = function(old_name)
+                old_path = path + '/' + old_name + '.' + type
+                new_path = path + '/' + new_name + '.' + type
+                os.rename(old_path, new_path)
+
+    def hide_certain_things(self, type='', name='', only_files=False):
+        for thing in self.things.copy():
+            thing_type = thing.__class__.__name__
+            only_files1 = only_files
+            if thing_type == 'Folder' and not only_files1 and name in thing.get_name():
+                if not thing.is_hidden():
+                    thing.hide()
+            elif thing_type == 'File' and name in thing.get_name()and (not type or type == thing.get_type()):
+                if not thing.is_hidden():
+                    thing.hide()
+
+    def unhide_certain_things(self, type='', name='', only_files=False):
+        for thing in self.things.copy():
+            thing_type = thing.__class__.__name__
+            only_files1 = only_files
+            if thing_type == 'Folder' and not only_files1 and name in thing.get_name():
+                if thing.is_hidden():
+                    thing.unhide()
+            elif thing_type == 'File' and name in thing.get_name()and (not type or type == thing.get_type()):
+                if thing.is_hidden():
+                    thing.unhide()
 
     def get_path(self):
         return self.path
@@ -124,12 +180,15 @@ class Automatizator:
     def get_things(self):
         return self.things
 
+    def get_lambda_rename(self, name):
+        return self.rename_lambdas[name]
+
 
 if __name__ == '__main__':
     auto = Automatizator('D:/Python/Automatizator/test')
-    auto.find_things(nesting_level=2)
+    auto.find_things(nesting_level=0)
     for i in auto.get_things():
         print(i.get_name())
         print(i.get_path())
         print()
-    auto.delete_certain_things(only_files=False)
+    auto.unhide_certain_things(name='11')
