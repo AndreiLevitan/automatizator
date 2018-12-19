@@ -107,18 +107,16 @@ class Automatizator:
     def delete_certain_things(self, type='', name='', only_files=False):  # если only_files, то не будет трогать папки
         for thing in self.things.copy():
             thing_type = thing.__class__.__name__
-            if thing_type == 'Folder' and not only_files and name in thing.get_name():
+            print(thing_type)
+            only_files1 = only_files
+            if type:
+                only_files1 = True
+            if thing_type == 'Folder' and not only_files1 and name in thing.get_name():
                 shutil.rmtree(thing.get_path(), ignore_errors=True)
                 self.things.remove(thing)
-            elif thing_type == 'File' and name in thing.get_name() \
-                and thing.get_name().split('.')[-1] == type:
+            elif thing_type == 'File' and name in thing.get_name() and type in thing.get_type():
                 os.remove(thing.get_path())
                 self.things.remove(thing)
-
-                # ПРОВЕРИТЬ!!!
-
-
-
 
     def get_path(self):
         return self.path
@@ -134,3 +132,4 @@ if __name__ == '__main__':
         print(i.get_name())
         print(i.get_path())
         print()
+    auto.delete_certain_things(only_files=False)
