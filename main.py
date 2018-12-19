@@ -174,6 +174,13 @@ class Automatizator:
                 if thing.is_hidden():
                     thing.unhide()
 
+    def keep_only_certain_files(self, type='', name=''):
+        for thing in self.things.copy():
+            thing_type = thing.__class__.__name__
+            if thing_type == 'File' and not (name in thing.get_name() and (not type or type == thing.get_type())):
+                os.remove(thing.get_path())
+                self.things.remove(thing)
+
     def get_path(self):
         return self.path
 
@@ -191,4 +198,4 @@ if __name__ == '__main__':
         print(i.get_name())
         print(i.get_path())
         print()
-    auto.unhide_certain_things(name='11')
+    auto.keep_only_certain_files(name='32')
