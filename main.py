@@ -83,8 +83,12 @@ class Automatizator:
         self.things = []   # здесь и далее things - и файлы, и папки
         self.FILENAME = 0
         self.DIRPATH = 1
+
+        # шаблоны лямда-функций для метода rename_certian_things и GUI
         self.rename_lambdas = {
+            # добавляет к названию дату и время
             'дата-время': lambda x: x + time.strftime(' [%Y-%m-%d %H-%M-%S]', time.gmtime())
+
         }
 
     # nesting_level отвечает за уровень вложенности (если 0 - не входит во вложенные каталоги,
@@ -116,7 +120,9 @@ class Automatizator:
                     thing = Folder(path)
                     self.things.append(thing)
 
-    def delete_certain_things(self, type='', name='', only_files=False):  # если only_files, то не будет трогать папки
+    # удаляет файлы и папки, подходящие по условию
+    # если only_files, то не будет трогать папки
+    def delete_certain_things(self, type='', name='', only_files=False):
         for thing in self.things.copy():
             thing_type = thing.__class__.__name__
             only_files1 = only_files
@@ -129,6 +135,7 @@ class Automatizator:
                 os.remove(thing.get_path())
                 self.things.remove(thing)
 
+    # переименовывает определённые things согласно лямбда-функции
     def rename_certian_things(self, type='', name='', only_files=False, function=lambda x: x + '1'):
         for thing in self.things.copy():
             thing_type = thing.__class__.__name__
@@ -152,7 +159,7 @@ class Automatizator:
                 new_path = path + '/' + new_name + '.' + type
                 os.rename(old_path, new_path)
 
-    def hide_certain_things(self, type='', name='', only_files=False):
+    def hide_certain_things(self, type='', name='', only_files=False):  # прячет файлы и папки
         for thing in self.things.copy():
             thing_type = thing.__class__.__name__
             only_files1 = only_files
@@ -163,7 +170,7 @@ class Automatizator:
                 if not thing.is_hidden():
                     thing.hide()
 
-    def unhide_certain_things(self, type='', name='', only_files=False):
+    def unhide_certain_things(self, type='', name='', only_files=False):  # открывает файлы и папки
         for thing in self.things.copy():
             thing_type = thing.__class__.__name__
             only_files1 = only_files
@@ -174,7 +181,7 @@ class Automatizator:
                 if thing.is_hidden():
                     thing.unhide()
 
-    def keep_only_certain_files(self, type='', name=''):
+    def keep_only_certain_files(self, type='', name=''):  # удаляет все файлы, не подходящие по условию
         for thing in self.things.copy():
             thing_type = thing.__class__.__name__
             if thing_type == 'File' and not (name in thing.get_name() and (not type or type == thing.get_type())):
