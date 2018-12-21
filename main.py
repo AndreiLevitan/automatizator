@@ -3,6 +3,7 @@ import win32api, win32con
 import shutil
 import time
 
+
 class File:
     def __init__(self, name, type, path):
         self.name = name
@@ -60,6 +61,7 @@ class Folder:
 
     def hide(self):  # прячет файл
         win32api.SetFileAttributes(self.get_path(), win32con.FILE_ATTRIBUTE_HIDDEN)
+        win32api.SetFileAttributes(self.get_path(), win32con.ICON)
         self.hidden = True
 
     def unhide(self):  # открывает файл
