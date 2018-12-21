@@ -105,7 +105,7 @@ class Automatizator:
             'Скрыть',
             'Показать'
         ]
-        
+
     # nesting_level отвечает за уровень вложенности (если 0 - не входит во вложенные каталоги,
     # если 1 - входит в подкаталоги, если -1 - входит во все подпапки)
     def find_things(self, nesting_level=-1):
@@ -349,6 +349,32 @@ class GUI(QMainWindow, Ui_MainWindow):
     def initUi(self):
         self.current_directory_label.setText(auto.get_path())
         self.current_move_combo_box.addItems(auto.get_actions())
+        self.name_input.setDisabled(True)
+        self.set_name_box.clicked.connect(self.name_box_run)
+
+        self.find_level_spin.setDisabled(True)
+        self.find_level_box.clicked.connect(self.find_level_box_run)
+
+        self.type_input.setDisabled(True)
+        self.set_type_box.clicked.connect(self.type_box_run)
+
+    def type_box_run(self):
+        if self.set_type_box.isChecked():
+            self.type_input.setDisabled(False)
+        else:
+            self.type_input.setDisabled(True)
+
+    def name_box_run(self):
+        if self.set_name_box.isChecked():
+            self.name_input.setDisabled(False)
+        else:
+            self.name_input.setDisabled(True)
+
+    def find_level_box_run(self):
+        if self.find_level_box.isChecked():
+            self.find_level_spin.setDisabled(False)
+        else:
+            self.find_level_spin.setDisabled(True)
 
 
 if __name__ == '__main__':
