@@ -263,13 +263,13 @@ class Ui_MainWindow(object):
         self.current_move_combo_box.setInsertPolicy(QtWidgets.QComboBox.InsertAtBottom)
         self.current_move_combo_box.setObjectName("current_move_combo_box")
         self.gridLayout.addWidget(self.current_move_combo_box, 1, 1, 1, 1)
-        self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_2.setGeometry(QtCore.QRect(30, 520, 601, 23))
-        self.pushButton_2.setCheckable(False)
-        self.pushButton_2.setAutoDefault(False)
-        self.pushButton_2.setDefault(False)
-        self.pushButton_2.setFlat(False)
-        self.pushButton_2.setObjectName("pushButton_2")
+        self.find_btn = QtWidgets.QPushButton(self.centralwidget)
+        self.find_btn.setGeometry(QtCore.QRect(30, 520, 601, 23))
+        self.find_btn.setCheckable(False)
+        self.find_btn.setAutoDefault(False)
+        self.find_btn.setDefault(False)
+        self.find_btn.setFlat(False)
+        self.find_btn.setObjectName("find_btn")
         self.gridLayoutWidget_2 = QtWidgets.QWidget(self.centralwidget)
         self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 210, 631, 125))
         self.gridLayoutWidget_2.setObjectName("gridLayoutWidget_2")
@@ -329,7 +329,7 @@ class Ui_MainWindow(object):
         self.current_directory_label.setText(_translate("MainWindow", "директория"))
         self.label_2.setText(_translate("MainWindow", "Действие:"))
         self.label.setText(_translate("MainWindow", "Текущая директория:"))
-        self.pushButton_2.setText(_translate("MainWindow", "Начать"))
+        self.find_btn.setText(_translate("MainWindow", "Начать"))
         self.set_name_box.setText(_translate("MainWindow", "Настроить шаблон имени"))
         self.type_input.setText(_translate("MainWindow", "Введите здесь типы файлов (mp3, txt и т.д.)"))
         self.set_type_box.setText(_translate("MainWindow", "Настроить тип файла"))
@@ -362,6 +362,12 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.only_files_box.clicked.connect(self.only_files_box_run)
 
         self.change_dir_btn.clicked.connect(self.change_dir)
+
+        self.find_btn.clicked.connect(self.find_run)
+
+    def find_run(self):
+        only_files = bool(self.only_files_box.isChecked())
+        # auto.find_things()
 
     def change_dir(self):
         path = QFileDialog.getExistingDirectory()
