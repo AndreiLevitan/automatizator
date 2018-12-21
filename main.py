@@ -347,7 +347,7 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.initUi()
 
     def initUi(self):
-        self.current_directory_label.setText(auto.get_path())
+        self.set_dir_in_label(auto.get_path())
         self.current_move_combo_box.addItems(auto.get_actions())
 
         self.name_input.setDisabled(True)
@@ -360,6 +360,19 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.set_type_box.clicked.connect(self.type_box_run)
 
         self.only_files_box.clicked.connect(self.only_files_box_run)
+
+        self.change_dir_btn.clicked.connect(self.change_dir)
+
+    def change_dir(self):
+        path = QFileDialog.getExistingDirectory()
+        self.set_dir_in_label(path)
+
+    def set_dir_in_label(self, path):
+        print(path)
+        if len(path) > 50:
+            path = path[:50] + '...'
+        self.current_directory_label.setText(path)
+        self.current_directory_label.adjustSize()
 
     def only_files_box_run(self):
         if self.only_files_box.isChecked():
