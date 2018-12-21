@@ -3,7 +3,9 @@ import win32api
 import win32con
 import shutil
 import time
+import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import QMainWindow, QApplication
 
 
 class File:
@@ -84,7 +86,7 @@ class Folder:
 class Automatizator:
     def __init__(self, path):
         self.path = path
-        self.things = []   # здесь и далее things - и файлы, и папки
+        self.things = []  # здесь и далее things - и файлы, и папки
         self.FILENAME = 0
         self.DIRPATH = 1
 
@@ -95,6 +97,15 @@ class Automatizator:
 
         }
 
+        # возможные действия пользователя
+        self.actions = [
+            'Удалить',
+            'Оставить',
+            'Переименовать',
+            'Скрыть',
+            'Показать'
+        ]
+        
     # nesting_level отвечает за уровень вложенности (если 0 - не входит во вложенные каталоги,
     # если 1 - входит в подкаталоги, если -1 - входит во все подпапки)
     def find_things(self, nesting_level=-1):
@@ -170,7 +181,7 @@ class Automatizator:
             if thing_type == 'Folder' and not only_files1 and name in thing.get_name():
                 if not thing.is_hidden():
                     thing.hide()
-            elif thing_type == 'File' and name in thing.get_name()and (not type or type == thing.get_type()):
+            elif thing_type == 'File' and name in thing.get_name() and (not type or type == thing.get_type()):
                 if not thing.is_hidden():
                     thing.hide()
 
@@ -181,7 +192,7 @@ class Automatizator:
             if thing_type == 'Folder' and not only_files1 and name in thing.get_name():
                 if thing.is_hidden():
                     thing.unhide()
-            elif thing_type == 'File' and name in thing.get_name()and (not type or type == thing.get_type()):
+            elif thing_type == 'File' and name in thing.get_name() and (not type or type == thing.get_type()):
                 if thing.is_hidden():
                     thing.unhide()
 
@@ -200,6 +211,9 @@ class Automatizator:
 
     def get_lambda_rename(self, name):
         return self.rename_lambdas[name]
+
+    def get_actions(self):
+        return self.actions
 
 
 class Ui_MainWindow(object):
@@ -320,18 +334,26 @@ class Ui_MainWindow(object):
         self.type_input.setText(_translate("MainWindow", "Введите здесь типы файлов (mp3, txt и т.д.)"))
         self.set_type_box.setText(_translate("MainWindow", "Настроить тип файла"))
         self.only_files_box.setText(_translate("MainWindow", "Только файлы"))
-        self.name_input.setText(_translate("MainWindow", "Все папки и файлы, которые содержат",
-                                           "данное имя, будут изменены"))
+        self.name_input.setText(_translate("MainWindow", "Объекты, которые содержат данное имя, будут изменены"))
         self.find_level_box.setText(_translate("MainWindow", "Уровень поиска"))
         self.pushButton_3.setText(_translate("MainWindow", "Найти"))
         self.label_5.setText(_translate("MainWindow", "Нажмите НАЙТИ для поиска заданных файлов и папок"))
 
 
+class GUI(QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.initUi()
+
+    def initUi(self):
+        self.current_directory_label.setText(auto.get_path())
+        self.current_move_combo_box.addItems(auto.get_actions())
+
+
 if __name__ == '__main__':
-    auto = Automatizator('D:/Python/Automatizator/test')
-    auto.find_things(nesting_level=0)
-    for i in auto.get_things():
-        print(i.get_name())
-        print(i.get_path())
-        print()
-    auto.keep_only_certain_files(name='32')
+    auto = Automatizator('C:/Users/User/PycharmProjects/SecondHalf/Automatizator/test')
+    app = QApplication(sys.argv)
+    gui = GUI()
+    gui.show()
+    sys.exit(app.exec_())
