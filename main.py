@@ -5,7 +5,7 @@ import shutil
 import time
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QMainWindow, QApplication
+from PyQt5.Qt import QMainWindow, QApplication, QFileDialog
 
 
 class File:
@@ -349,6 +349,7 @@ class GUI(QMainWindow, Ui_MainWindow):
     def initUi(self):
         self.current_directory_label.setText(auto.get_path())
         self.current_move_combo_box.addItems(auto.get_actions())
+
         self.name_input.setDisabled(True)
         self.set_name_box.clicked.connect(self.name_box_run)
 
@@ -357,6 +358,16 @@ class GUI(QMainWindow, Ui_MainWindow):
 
         self.type_input.setDisabled(True)
         self.set_type_box.clicked.connect(self.type_box_run)
+
+        self.only_files_box.clicked.connect(self.only_files_box_run)
+
+    def only_files_box_run(self):
+        if self.only_files_box.isChecked():
+            self.set_type_box.setDisabled(True)
+            self.type_input.setDisabled(True)
+        else:
+            self.set_type_box.setDisabled(False)
+            self.type_box_run()
 
     def type_box_run(self):
         if self.set_type_box.isChecked():
