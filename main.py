@@ -230,6 +230,9 @@ class Automatizator:
     def get_path(self):
         return self.path
 
+    def set_path(self, path):
+        self.path = path
+
     def get_things(self):
         return self.things
 
@@ -404,15 +407,54 @@ class GUI(QMainWindow, Ui_MainWindow):
 
         self.change_dir_btn.clicked.connect(self.change_dir)
 
-        self.find_btn.clicked.connect(self.find_run)
+        self.find_btn.clicked.connect(self.find_user_run)
 
-    def find_run(self):
-        only_files = bool(self.only_files_box.isChecked())
-        print(only_files)
-        # auto.find_things()
+        index = self.current_move_combo_box.currentIndex()
+        self.current_action = auto.get_actions()[index]
+        self.current_move_combo_box.currentIndexChanged.connect(self.item_changed_run)
+
+        self.start_btn.clicked.connect(self.start_action)
+
+    def item_changed_run(self):
+        index = self.sender().currentIndex()
+        self.current_action = auto.get_actions()[index]
+        if self.current_action == 'Переименовать':
+            print('ДОДЕЛАТЬ')
+
+    def find_user_run(self):
+        nesting_level = self.get_user_nesting_level()
+        auto.find_things(nesting_level=nesting_level)
+        print(auto.get_things())
+
+    def start_action(self):
+        only_files = self.is_only_files()
+        if not only_files:
+            type = self.get_user_type()
+        else:
+            type = ''
+        name = self.get_user_name()
+
+    def is_only_files(self):
+        return bool(self.only_files_box.isChecked())
+
+    def get_user_type(self):
+        if self.set_type_box.isChecked():
+            return self.type_input.text()
+        return ''
+
+    def get_user_name(self):
+        if self.set_name_box.isChecked():
+            return self.name_input.text()
+        return ''
+
+    def get_user_nesting_level(self):
+        if self.find_level_box.isChecked():
+            return int(self.find_level_spin.text())
+        return -1
 
     def change_dir(self):
         path = QFileDialog.getExistingDirectory()
+        auto.set_path(path)
         self.set_dir_in_label(path)
 
     def set_dir_in_label(self, path):
@@ -450,8 +492,7 @@ class GUI(QMainWindow, Ui_MainWindow):
 
 
 if __name__ == '__main__':
-    auto = Automatizator('C:/Users/User/PycharmProjects/' +
-                         'SecondHalf/Automatizator/test')
+    auto = Automatizator('D:/Python/Automatizator/test')
     app = QApplication(sys.argv)
     gui = GUI()
     gui.show()
