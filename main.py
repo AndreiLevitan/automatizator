@@ -232,11 +232,8 @@ class Automatizator:
         for thing in self.things.copy():
             thing_type = thing.__class__.__name__
             if thing_type == 'File' \
-                    and ((name or name not in thing.get_name()) or
-                         (type or type != thing.get_type())):
-                print(name or name not in thing.get_name())
-                print(type != thing.get_type())
-                print(type, thing.get_type())
+                    and (name not in thing.get_name() or
+                         type != thing.get_type()):
                 os.remove(thing.get_path())
                 self.things.remove(thing)
 
@@ -446,12 +443,18 @@ class GUI(QMainWindow, Ui_MainWindow):
             self.was_rename = False
             self.comboBox.setParent(None)
             self.label_3.setParent(None)
-        elif self.current_action == 'Оставить':
+        if self.current_action == 'Оставить':
             self.only_files_box.setChecked(True)
             self.only_files_box.setDisabled(True)
+            self.set_type_box.setChecked(True)
+            self.set_type_box.setDisabled(True)
+            self.type_input.setDisabled(False)
         elif self.current_action != 'Оставить':
             self.only_files_box.setChecked(False)
             self.only_files_box.setDisabled(False)
+            self.set_type_box.setChecked(False)
+            self.set_type_box.setDisabled(False)
+            self.type_input.setDisabled(True)
 
     def rename_expression(self):
         self.comboBox = QtWidgets.QComboBox(self.gridLayoutWidget_2)
