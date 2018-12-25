@@ -6,7 +6,7 @@ import time
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import QMainWindow, QApplication, QFileDialog, QMessageBox
-from PyQt5.QtWidgets import QComboBox, QLabel, QLineEdit
+from PyQt5.Qt import QIcon
 
 
 class File:
@@ -406,6 +406,9 @@ class GUI(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.setWindowTitle('Automatizator')
+        icon = QIcon('icon.ico')
+        self.setWindowIcon(icon)
         self.initUi()
         self.was_rename = False
 
@@ -500,8 +503,6 @@ class GUI(QMainWindow, Ui_MainWindow):
             QMessageBox.question(self, 'Ошибка', 'Программа ошиблась', QMessageBox.Ok)
         finally:
             self.find_user_run()
-
-
 
     # проверяет на истинность чекбокс Только файлы
     def is_only_files(self):
