@@ -5,7 +5,7 @@ import shutil
 import time
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QMainWindow, QApplication, QFileDialog
+from PyQt5.Qt import QMainWindow, QApplication, QFileDialog, QMessageBox
 from PyQt5.QtWidgets import QComboBox, QLabel, QLineEdit
 
 
@@ -434,6 +434,7 @@ class GUI(QMainWindow, Ui_MainWindow):
 
         self.start_btn.clicked.connect(self.start_action)
 
+    # запускается при изменении итем в комбо-боксе
     def item_changed_run(self):
         index = self.sender().currentIndex()
         self.current_action = auto.get_actions()[index]
@@ -457,6 +458,7 @@ class GUI(QMainWindow, Ui_MainWindow):
             self.set_type_box.setDisabled(False)
             self.type_input.setDisabled(True)
 
+    # запускается, если в комбо-боксе стоит Переименовать
     def rename_expression(self):
         self.comboBox = QtWidgets.QComboBox(self.gridLayoutWidget_2)
         self.comboBox.setObjectName("comboBox")
@@ -469,52 +471,67 @@ class GUI(QMainWindow, Ui_MainWindow):
 
         self.comboBox.addItems(auto.get_lambdas_names())
 
+    # запускает поиск от пользователя
     def find_user_run(self):
         nesting_level = self.get_user_nesting_level()
         auto.find_things(nesting_level=nesting_level)
         self.label_5.setText(auto.get_info())
 
+    # запускает изменение от пользователя
     def start_action(self):
         only_files = self.is_only_files()
         type = self.get_user_type()
         name = self.get_user_name()
-        if self.current_action == 'Переименовать':
-            lambda_name = self.comboBox.currentText()
-            lambda_template = auto.get_lambda_rename(lambda_name)
-            auto.rename_certian_things(type=type, only_files=only_files,
-                                       name=name, function=lambda_template)
-        elif self.current_action == 'Удалить':
-            auto.delete_certain_things(type=type, name=name, only_files=only_files)
-        elif self.current_action == 'Оставить':
-            auto.keep_only_certain_files(type=type, name=name)
-        elif self.current_action == 'Скрыть':
-            auto.hide_certain_things(type=type, name=name, only_files=only_files)
-        elif self.current_action == 'Показать':
-            auto.unhide_certain_things(type=type, name=name, only_files=only_files)
+        try:
+            if self.current_action == 'Переименовать':
+                lambda_name = self.comboBox.currentText()
+                lambda_template = auto.get_lambda_rename(lambda_name)
+                auto.rename_certian_things(type=type, only_files=only_files,
+                                           name=name, function=lambda_template)
+            elif self.current_action == 'Удалить':
+                auto.delete_certain_things(type=type, name=name, only_files=only_files)
+            elif self.current_action == 'Оставить':
+                auto.keep_only_certain_files(type=type, name=name)
+            elif self.current_action == 'Скрыть':
+                auto.hide_certain_things(type=type, name=name, only_files=only_files)
+            elif self.current_action == 'Показать':
+                auto.unhide_certain_things(type=type, name=name, only_files=only_files)
+        except Exception:
+            QMessageBox.question(self, 'Ошибка', 'Программа ошиблась', QMessageBox.Ok)
+        finally:
+            self.find_user_run()
 
+
+
+    # проверяет на истинность чекбокс Только файлы
     def is_only_files(self):
         return bool(self.only_files_box.isChecked())
 
+    # возвращает тип, заданный пользователем
     def get_user_type(self):
         if self.set_type_box.isChecked():
             return self.type_input.text()
         return ''
 
+    # возвращает шаблон имени, заданный пользоватлем
     def get_user_name(self):
         if self.set_name_box.isChecked():
             return self.name_input.text()
         return ''
 
+    # возвращает уровень поиска от пользователя
     def get_user_nesting_level(self):
         if self.find_level_box.isChecked():
             return int(self.find_level_spin.text())
         return -1
 
+    # запускает диалог выбора директории поиска
     def change_dir(self):
         path = QFileDialog.getExistingDirectory()
         auto.set_path(path)
         self.set_dir_in_label(path)
 
+    # изменяет лейбл директории
     def set_dir_in_label(self, path):
         if len(path) > 50:
             path = path[:50] + '...'
@@ -524,6 +541,8 @@ class GUI(QMainWindow, Ui_MainWindow):
     def only_files_box_run(self):
         pass
 
+    # зависимость only_files от set_type чекбоксов
+    # активирует/деактивирует input типа поиска
     def type_box_run(self):
         if self.set_type_box.isChecked():
             self.previous_only_files_able = not self.only_files_box.isEnabled()
@@ -536,12 +555,14 @@ class GUI(QMainWindow, Ui_MainWindow):
             self.only_files_box.setDisabled(self.previous_only_files_able)
             self.type_input.setDisabled(True)
 
+    # активирует/деактивирует input имени
     def name_box_run(self):
         if self.set_name_box.isChecked():
             self.name_input.setDisabled(False)
         else:
             self.name_input.setDisabled(True)
 
+    # активирует/деактивирует input уровня поиска
     def find_level_box_run(self):
         if self.find_level_box.isChecked():
             self.find_level_spin.setDisabled(False)
