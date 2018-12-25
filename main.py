@@ -99,8 +99,8 @@ class Automatizator:
         # шаблоны лямда-функций для метода rename_certian_things и GUI
         self.rename_lambdas = {
             # добавляет к названию дату и время
-            'дата-время': lambda x:
-            x + time.strftime(' [%Y-%m-%d %H-%M-%S]', time.gmtime())
+             '[ГГГГ-ММ-ДД ЧЧ-ММ-СС]': lambda x:
+            x + time.strftime(' [%Y-%m-%d %H-%M-%S]', time.localtime())
 
         }
 
@@ -148,6 +148,7 @@ class Automatizator:
                     thing = Folder(path)
                     self.things.append(thing)
                     self.folders_count += 1
+        self.things = list(sorted(self.things, key=lambda x: x.get_path(), reverse=True))
 
     # удаляет файлы и папки, подходящие по условию
     # если only_files, то не будет трогать папки
