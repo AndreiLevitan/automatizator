@@ -434,6 +434,12 @@ class GUI(QMainWindow, Ui_MainWindow):
             self.was_rename = False
             self.comboBox.setParent(None)
             self.label_3.setParent(None)
+        elif self.current_action == 'Оставить':
+            self.only_files_box.setChecked(True)
+            self.only_files_box.setDisabled(True)
+        elif self.current_action != 'Оставить':
+            self.only_files_box.setChecked(False)
+            self.only_files_box.setDisabled(False)
 
     def rename_expression(self):
         self.comboBox = QtWidgets.QComboBox(self.gridLayoutWidget_2)
@@ -511,10 +517,14 @@ class GUI(QMainWindow, Ui_MainWindow):
 
     def type_box_run(self):
         if self.set_type_box.isChecked():
+            self.previous_only_files_able = not self.only_files_box.isEnabled()
+            self.previous_only_files_check = self.only_files_box.isChecked()
             self.only_files_box.setChecked(True)
+            self.only_files_box.setDisabled(True)
             self.type_input.setDisabled(False)
         else:
-            self.only_files_box.setChecked(False)
+            self.only_files_box.setChecked(self.previous_only_files_check)
+            self.only_files_box.setDisabled(self.previous_only_files_able)
             self.type_input.setDisabled(True)
 
     def name_box_run(self):
