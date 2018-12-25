@@ -254,9 +254,9 @@ class Automatizator:
 
     def get_actions(self):
         return self.actions
-    
+
     def get_info(self):
-        return 'Пакок: {0}, файлов: {1}'.format(self.folders_count,
+        return 'Папок: {0}, файлов: {1}'.format(self.folders_count,
                                                 self.files_count)
 
 
@@ -465,6 +465,8 @@ class GUI(QMainWindow, Ui_MainWindow):
     def find_user_run(self):
         nesting_level = self.get_user_nesting_level()
         auto.find_things(nesting_level=nesting_level)
+        self.label_5.setText(auto.get_info())
+
 
     def start_action(self):
         only_files = self.is_only_files()
