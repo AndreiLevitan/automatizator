@@ -113,13 +113,13 @@ class Automatizator:
             'Показать'
         ]
 
-        self.folders_count = 0
-        self.files_count = 0
 
     # nesting_level отвечает за уровень вложенности
     # (если 0 - не входит во вложенные каталоги,
     # если 1 - входит в подкаталоги, если -1 - входит во все подпапки)
     def find_things(self, nesting_level=-1):
+        self.folders_count = 0
+        self.files_count = 0
         things = set()
         level = nesting_level
         for (dirpath, dirnames, filenames) in os.walk(self.get_path()):
@@ -205,7 +205,7 @@ class Automatizator:
                     and name in thing.get_name():
                 if not thing.is_hidden():
                     thing.hide()
-            elif thing_type == 'File' and name in thing.get_name()\
+            elif thing_type == 'File' and name in thing.get_name() \
                     and (not type or type == thing.get_type()):
                 if not thing.is_hidden():
                     thing.hide()
@@ -232,8 +232,11 @@ class Automatizator:
         for thing in self.things.copy():
             thing_type = thing.__class__.__name__
             if thing_type == 'File' \
-                    and not (name in thing.get_name() and
-                             (not type or type == thing.get_type())):
+                    and ((name or name not in thing.get_name()) or
+                         (type or type != thing.get_type())):
+                print(name or name not in thing.get_name())
+                print(type != thing.get_type())
+                print(type, thing.get_type())
                 os.remove(thing.get_path())
                 self.things.remove(thing)
 
@@ -467,13 +470,9 @@ class GUI(QMainWindow, Ui_MainWindow):
         auto.find_things(nesting_level=nesting_level)
         self.label_5.setText(auto.get_info())
 
-
     def start_action(self):
         only_files = self.is_only_files()
-        if not only_files:
-            type = self.get_user_type()
-        else:
-            type = ''
+        type = self.get_user_type()
         name = self.get_user_name()
         if self.current_action == 'Переименовать':
             lambda_name = self.comboBox.currentText()
@@ -520,11 +519,6 @@ class GUI(QMainWindow, Ui_MainWindow):
 
     def only_files_box_run(self):
         pass
-        # if self.only_files_box.isChecked():
-        #     pass
-        # else:
-        #     self.set_type_box.setDisabled(False)
-        #     self.type_box_run()
 
     def type_box_run(self):
         if self.set_type_box.isChecked():
