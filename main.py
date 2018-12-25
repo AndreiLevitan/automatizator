@@ -113,6 +113,9 @@ class Automatizator:
             'Показать'
         ]
 
+        self.folders_count = 0
+        self.files_count = 0
+
     # nesting_level отвечает за уровень вложенности
     # (если 0 - не входит во вложенные каталоги,
     # если 1 - входит в подкаталоги, если -1 - входит во все подпапки)
@@ -137,12 +140,14 @@ class Automatizator:
             if type == 'file':
                 thing = File(name, name.split('.')[-1], path)
                 self.things.append(thing)
+                self.files_count += 1
             else:
                 cur_path = os.getcwd().replace('\\', '/') + '/' \
                            + self.path.split('/')[-1]
                 if cur_path != path:
                     thing = Folder(path)
                     self.things.append(thing)
+                    self.folders_count += 1
 
     # удаляет файлы и папки, подходящие по условию
     # если only_files, то не будет трогать папки
@@ -249,6 +254,10 @@ class Automatizator:
 
     def get_actions(self):
         return self.actions
+    
+    def get_info(self):
+        return 'Пакок: {0}, файлов: {1}'.format(self.folders_count,
+                                                self.files_count)
 
 
 class Ui_MainWindow(object):
