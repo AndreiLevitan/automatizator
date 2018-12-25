@@ -6,6 +6,7 @@ import time
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import QMainWindow, QApplication, QFileDialog
+from PyQt5.QtWidgets import QComboBox, QLabel, QLineEdit
 
 
 class File:
@@ -239,6 +240,9 @@ class Automatizator:
     def get_lambda_rename(self, name):
         return self.rename_lambdas[name]
 
+    def get_lambdas_names(self):
+        return self.rename_lambdas.keys()
+
     def get_actions(self):
         return self.actions
 
@@ -369,7 +373,7 @@ class Ui_MainWindow(object):
         self.set_name_box.setText(_translate("MainWindow",
                                              "Настроить шаблон имени"))
         self.type_input.setText(_translate("MainWindow",
-                                           "Введите здесь типы файлов" +
+                                           "Введите здесь тип файлов" +
                                            " (mp3, txt и т.д.)"))
         self.set_type_box.setText(_translate("MainWindow",
                                              "Настроить тип файла"))
@@ -419,7 +423,24 @@ class GUI(QMainWindow, Ui_MainWindow):
         index = self.sender().currentIndex()
         self.current_action = auto.get_actions()[index]
         if self.current_action == 'Переименовать':
-            print('ДОДЕЛАТЬ')
+            self.rename_expression()
+            self.was_rename = True
+        elif self.was_rename and self.current_action != 'Переименовать':
+            self.was_rename = False
+            self.comboBox.setParent(None)
+            self.label_3.setParent(None)
+
+    def rename_expression(self):
+        self.comboBox = QtWidgets.QComboBox(self.gridLayoutWidget_2)
+        self.comboBox.setObjectName("comboBox")
+        self.gridLayout_2.addWidget(self.comboBox, 4, 1, 1, 1)
+
+        self.label_3 = QtWidgets.QLabel(self.gridLayoutWidget_2)
+        self.label_3.setObjectName("label_3")
+        self.gridLayout_2.addWidget(self.label_3, 4, 0, 1, 1)
+        self.label_3.setText("Шаблон переименования")
+
+        self.comboBox.addItems(auto.get_lambdas_names())
 
     def find_user_run(self):
         nesting_level = self.get_user_nesting_level()
@@ -433,6 +454,19 @@ class GUI(QMainWindow, Ui_MainWindow):
         else:
             type = ''
         name = self.get_user_name()
+        if self.current_action == 'Переименовать':
+            lambda_name = self.comboBox.currentText()
+            lambda_template = auto.get_lambda_rename(lambda_name)
+            auto.rename_certian_things(type=type, only_files=only_files,
+                                       name=name, function=lambda_template)
+        elif self.current_action == 'Удалить':
+            auto.delete_certain_things(type=type, name=name, only_files=only_files)
+        elif self.current_action == 'Оставить':
+            auto.keep_only_certain_files(type=type, name=name)
+        elif self.current_action == 'Скрыть':
+            auto.hide_certain_things(type=type, name=name, only_files=only_files)
+        elif self.current_action == 'Показать':
+            auto.unhide_certain_things(type=type, name=name, only_files=only_files)
 
     def is_only_files(self):
         return bool(self.only_files_box.isChecked())
