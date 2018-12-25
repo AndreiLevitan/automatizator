@@ -194,6 +194,8 @@ class Automatizator:
         for thing in self.things.copy():
             thing_type = thing.__class__.__name__
             only_files1 = only_files
+            if type:
+                only_files1 = True
             if thing_type == 'Folder' and not only_files1 \
                     and name in thing.get_name():
                 if not thing.is_hidden():
@@ -209,6 +211,8 @@ class Automatizator:
         for thing in self.things.copy():
             thing_type = thing.__class__.__name__
             only_files1 = only_files
+            if type:
+                only_files1 = True
             if thing_type == 'Folder' and not only_files1 \
                     and name in thing.get_name():
                 if thing.is_hidden():
@@ -393,6 +397,7 @@ class GUI(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.initUi()
+        self.was_rename = False
 
     def initUi(self):
         self.set_dir_in_label(auto.get_path())
@@ -445,7 +450,6 @@ class GUI(QMainWindow, Ui_MainWindow):
     def find_user_run(self):
         nesting_level = self.get_user_nesting_level()
         auto.find_things(nesting_level=nesting_level)
-        print(auto.get_things())
 
     def start_action(self):
         only_files = self.is_only_files()
@@ -492,24 +496,25 @@ class GUI(QMainWindow, Ui_MainWindow):
         self.set_dir_in_label(path)
 
     def set_dir_in_label(self, path):
-        print(path)
         if len(path) > 50:
             path = path[:50] + '...'
         self.current_directory_label.setText(path)
         self.current_directory_label.adjustSize()
 
     def only_files_box_run(self):
-        if self.only_files_box.isChecked():
-            self.set_type_box.setDisabled(True)
-            self.type_input.setDisabled(True)
-        else:
-            self.set_type_box.setDisabled(False)
-            self.type_box_run()
+        pass
+        # if self.only_files_box.isChecked():
+        #     pass
+        # else:
+        #     self.set_type_box.setDisabled(False)
+        #     self.type_box_run()
 
     def type_box_run(self):
         if self.set_type_box.isChecked():
+            self.only_files_box.setChecked(True)
             self.type_input.setDisabled(False)
         else:
+            self.only_files_box.setChecked(False)
             self.type_input.setDisabled(True)
 
     def name_box_run(self):
